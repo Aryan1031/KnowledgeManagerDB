@@ -1,0 +1,3 @@
+[submodule "dependencies/hnswlib"]
+	path = dependencies/hnswlib
+	url = https://github.com/nmslib/hnswlib.git

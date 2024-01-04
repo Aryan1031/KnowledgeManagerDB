@@ -1,0 +1,3 @@
+[submodule "Dependency Folder/hnswlib"]
+	path = Dependency Folder/hnswlib
+	url = https://github.com/nmslib/hnswlib.git

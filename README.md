@@ -1,7 +1,10 @@
 # KnowledgeManagerDB
 The primary objective is to develop a C++ library that connects the llama.cpp embedding generator with a FAISS-based vector database. This library will allow for efficient storage and retrieval of significant files in a database, and support retrieval-augmented generation using the LLM (Large Language Models).
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 67bb105d00d5b1cda8eb26907c360b4769b48503
 Customer Documentation
 
 Project Overview and Objectives
@@ -127,6 +130,9 @@ public:
 };
 
 VectorDB db("Local_vector_db.db");
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 67bb105d00d5b1cda8eb26907c360b4769b48503

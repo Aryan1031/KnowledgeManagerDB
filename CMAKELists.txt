@@ -1,0 +1,24 @@
+cmake_minimum_required(VERSION 3.10)
+
+# Project name and a few useful settings. Other commands can pick up the results
+project(KnowledgeManagerDb)
+
+# Specify the C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# Add the SQLite3 library
+add_library(sqlite3 STATIC sqlite3.c)
+
+# Include directories for the SQLite
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Create a library for KnowledgeManagerDb
+add_library(KnowledgeManagerDb STATIC knowledgeManagerDb.cpp)
+
+# Link KnowledgeManagerDb with sqlite3
+target_link_libraries(KnowledgeManagerDb PRIVATE sqlite3)
+
+# If you have any executables that use this library, you can add them here
+# add_executable(YourExecutableName main.cpp)
+# target_link_libraries(YourExecutableName PRIVATE KnowledgeManagerDb)

@@ -1,4 +1,5 @@
-Introduction
+Introduction:
+
 The Knowledge Manager is an integral component of your AI generative model, facilitating the storage and retrieval of information. This tool employs both SQLite for text data and hnswlib for vector embeddings. This document offers an insightful explanation of the Knowledge Manager's functionality, especially the integration with hnswlib and SQLite.
 
 1. Initialization
@@ -8,7 +9,8 @@ Upon initialization, the Knowledge Manager establishes connections with the unde
 2. Inserting Records
 When inserting a record, the insertRecord function is employed. This function takes three main parameters: ID, input text data, and vector embeddings. The ID serves as a unique identifier for the record, and both the text data and embeddings are associated with this ID.
 
-Example:
+Example: 
+
 int id = 1;
 std::string inputText = "User input text";
 std::vector<float> embeddings = LlamaGetEmbeddings(inputText); // Provided by llama.cpp
@@ -25,6 +27,7 @@ Utilizes the addPoint function to add the embeddings and their associated ID to 
 After adding embeddings to the hnswlib index, the serialized index is saved using the saveIndex function. This function takes a string parameter representing the path to the file where the serialized HNSW index will be stored.
 
 Example:
+
 std::string hnswPath = "hnsw.bin";
 knowledgeManager.saveHnswIndex(hnswPath);
 
@@ -32,6 +35,7 @@ knowledgeManager.saveHnswIndex(hnswPath);
 To retrieve records, the selectRecord function is used. This function requires an ID as input and returns a vector of strings containing the text data associated with the k-nearest neighbors of the input vector embeddings.
 
 Example:
+
 int id = 1;
 std::vector<std::string> retrievedData = knowledgeManager.selectRecord(id);
 

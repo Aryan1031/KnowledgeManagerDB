@@ -24,23 +24,40 @@ KnowledgeManagerDb::~KnowledgeManagerDb() {
 }
 
 
-bool KnowledgeManagerDb::insertRecord(int id, const std::string& data) {
-    // Insert text into SQLite
-    // ...existing SQLite code
+bool KnowledgeManagerDb::insertRecord(int id, const std::string& data,const std::vector<float>& embeddings) {
+    // SQLite insert
+const char* sql = "INSERT INTO my_table (id, data) VALUES (?, ?)";
+sqlite3_stmt* stmt;
+
+if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
+return false;
+}
+
+sqlite3_bind_int(stmt, 1, id);
+sqlite3_bind_text(stmt, 2, data.c_str(), -1, SQLITE_TRANSIENT);
+
+if(sqlite3_step(stmt) != SQLITE_DONE) {
+std::cerr << "Insert failed: " << sqlite3_errmsg(db) << std::endl;
+sqlite3_finalize(stmt);
+return false;
+}
+
+sqlite3_finalize(stmt);
 
 
     // Generate random embeddings
-    std::mt19937 rng;
-    rng.seed(47);
-    std::uniform_real_distribution<> distrib;
-    float embeddings[16]; //dim
-    for (int i = 0; i < 16; i++) {
-        embeddings[i] = distrib(rng);
-    }
+    // std::mt19937 rng;
+    // rng.seed(47);
+    // std::uniform_real_distribution<> distrib;
+    // float embeddings[16]; //dim
+    // for (int i = 0; i < 16; i++) {
+    //     embeddings[i] = distrib(rng);
+    // }
 
 
     // Add embeddings to alg_hnsw
-    alg_hnsw->addPoint(embeddings, id);
+    alg_hnsw->addPoint(embeddings.data(), id);
 
 
     // Save index
@@ -97,7 +114,7 @@ std::string KnowledgeManagerDb::selectRecord(int id, int k) {
     // Get nearest neighbor IDs
     std::vector<int> ids;
     while (!results.empty()) {
-        ids.push_back(results.top().second);
+        ids.push_back(results.top().second);  //results.top().second-> label (results is priority_queue of pairs)
         results.pop();
     }
 
@@ -106,7 +123,7 @@ std::string KnowledgeManagerDb::selectRecord(int id, int k) {
     std::string records;
     for (int neighborId : ids) {
         std::string record = lookupRecord(neighborId);
-        records += record + " "; //newline ch
+        records += record + "\n"; 
     }
 
 

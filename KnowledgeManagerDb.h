@@ -12,9 +12,9 @@ public:
     ~KnowledgeManagerDb();
 
 
-    bool insertRecord(int id, const std::string& data);
+    bool insertRecord(int id, const std::string& data, const std::vector<float>& embeddings);
     std::string selectRecord(int id, int k);
-
+    std::string lookupRecord(int id);
 
 private:
     sqlite3* db;
@@ -23,7 +23,7 @@ private:
     std::string hnswIndexPath;
 
 
-    std::string lookupRecord(int id);
+    
 };
 
 

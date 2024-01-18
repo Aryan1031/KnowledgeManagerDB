@@ -1,84 +1,73 @@
 #include "KnowledgeManagerDb.h"
 #include <iostream>
 #include <random>
+#include <stdexcept>
+knowledgemanagerdb::knowledgemanagerdb(const char* dbpath) {
+    sqlite3_open(dbpath, &db);
 
-
-KnowledgeManagerDb::KnowledgeManagerDb(const char* dbPath) {
-    // Initialize SQLite DB
-    sqlite3_open(dbPath, &db);
-
-
-    // Initialize hnswlib
     int dim = 16;
     space = new hnswlib::L2Space(dim);
     alg_hnsw = new hnswlib::HierarchicalNSW<float>(space, 1, 16, 200);
-    hnswIndexPath = "hnsw.bin";
+
+    if (!alg_hnsw) {
+        std::cout << "NULL PTR1" << "\n";
+    }
+
+    hnswindexpath = "hnsw.bin";
 }
 
-
-KnowledgeManagerDb::~KnowledgeManagerDb() {
-    // Cleanup
+knowledgemanagerdb::~knowledgemanagerdb() {
     delete alg_hnsw;
     delete space;
     sqlite3_close(db);
 }
 
+bool knowledgemanagerdb::insertrecord(int id, const std::string& data, const std::vector<float>& embeddings) {
+    const char* sql = "insert into my_table (id, data) values (?, ?)";
+    sqlite3_stmt* stmt;
 
-bool KnowledgeManagerDb::insertRecord(int id, const std::string& data,const std::vector<float>& embeddings) {
-    // SQLite insert
-const char* sql = "INSERT INTO my_table (id, data) VALUES (?, ?)";
-sqlite3_stmt* stmt;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
 
-if(sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << std::endl;
-return false;
-}
+    sqlite3_bind_int(stmt, 1, id);
+    sqlite3_bind_text(stmt, 2, data.c_str(), -1, SQLITE_TRANSIENT);
 
-sqlite3_bind_int(stmt, 1, id);
-sqlite3_bind_text(stmt, 2, data.c_str(), -1, SQLITE_TRANSIENT);
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        std::cerr << "insert failed: " << sqlite3_errmsg(db) << std::endl;
+        sqlite3_finalize(stmt);
+        return false;
+    }
 
-if(sqlite3_step(stmt) != SQLITE_DONE) {
-std::cerr << "Insert failed: " << sqlite3_errmsg(db) << std::endl;
-sqlite3_finalize(stmt);
-return false;
-}
+    sqlite3_finalize(stmt);
 
-sqlite3_finalize(stmt);
+    if (alg_hnsw == nullptr) {
+        std::cout << "NULL PTR1" << "\n";
+        return false;
+    }
 
-
-    // Generate random embeddings
-    // std::mt19937 rng;
-    // rng.seed(47);
-    // std::uniform_real_distribution<> distrib;
-    // float embeddings[16]; //dim
-    // for (int i = 0; i < 16; i++) {
-    //     embeddings[i] = distrib(rng);
-    // }
-
-
-    // Add embeddings to alg_hnsw
     alg_hnsw->addPoint(embeddings.data(), id);
+    alg_hnsw->saveIndex(hnswindexpath);
 
-
-    // Save index
-    alg_hnsw->saveIndex(hnswIndexPath);
     return true;
 }
 
-
-std::string KnowledgeManagerDb::lookupRecord(int id) {
-    const char* sql = "SELECT data FROM my_table WHERE id = ?";
-    sqlite3_stmt* stmt;
-
-
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
-        std::cerr << "Failed to prepare select statement: " << sqlite3_errmsg(db) << std::endl;
+std::string knowledgemanagerdb::lookuprecord(int id) {
+    if (!alg_hnsw) {
+        std::cout << "NULL PTR" << "\n";
         return "";
     }
 
+    const char* sql = "select data from my_table where id = ?";
+    sqlite3_stmt* stmt;
+
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "failed to prepare select statement: " << sqlite3_errmsg(db) << std::endl;
+        return "";
+    }
 
     sqlite3_bind_int(stmt, 1, id);
-
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         const unsigned char* text = sqlite3_column_text(stmt, 0);
@@ -89,43 +78,42 @@ std::string KnowledgeManagerDb::lookupRecord(int id) {
         }
     }
 
-
     sqlite3_finalize(stmt);
     return "";
 }
 
+std::string knowledgemanagerdb::selectrecord(int id, int k) {
+    if (!alg_hnsw) {
+        std::cout << "NULL PTR2" << "\n";
+        return "";
+    }
 
-std::string KnowledgeManagerDb::selectRecord(int id, int k) {
-    // Load index
-    alg_hnsw->loadIndex(hnswIndexPath);
+    try {
+        alg_hnsw->loadIndex(hnswindexpath, space, 1);
+    }
+    catch (const std::exception& e) {
+        std::cout << "NULL PTR3" << "\n";
+        // Handle error
+    }
 
-
-    // Dummy query point
     float query[16];
     for (int i = 0; i < 16; i++) {
         query[i] = i;
     }
 
-
-    // Search for nearest neighbors
     std::priority_queue<std::pair<float, hnswlib::labeltype>> results = alg_hnsw->searchKnn(query, k);
 
-
-    // Get nearest neighbor IDs
     std::vector<int> ids;
     while (!results.empty()) {
-        ids.push_back(results.top().second);  //results.top().second-> label (results is priority_queue of pairs)
+        ids.push_back(results.top().second);
         results.pop();
     }
 
-
-    // Look up strings for IDs in SQLite DB
     std::string records;
-    for (int neighborId : ids) {
-        std::string record = lookupRecord(neighborId);
-        records += record + "\n"; 
+    for (int neighborid : ids) {
+        std::string record = lookuprecord(neighborid);
+        records += record + "\n";
     }
-
 
     return records;
 }

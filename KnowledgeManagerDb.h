@@ -1,30 +1,27 @@
-#ifndef KNOWLEDGEMANAGERDB_H
-#define KNOWLEDGEMANAGERDB_H
-#include "sqlite3.h"
-#include "../../hnswlib/hnswlib.h"
+#ifndef knowledgemanagerdb_h
+#define knowledgemanagerdb_h
+
+#include "./dependency_folder/sqlite.gz/sqlite-autoconf-3400100/sqlite3.h"
+#include "./dependency_folder/hnswlib/hnswlib/hnswlib.h"
 #include <string>
 #include <vector>
+#include <iostream>
+#include <stdexcept>
 
-
-class KnowledgeManagerDb {
+class knowledgemanagerdb {
 public:
-    KnowledgeManagerDb(const char* dbPath);
-    ~KnowledgeManagerDb();
+    knowledgemanagerdb(const char* dbpath);
+    ~knowledgemanagerdb();
 
-
-    bool insertRecord(int id, const std::string& data, const std::vector<float>& embeddings);
-    std::string selectRecord(int id, int k);
-    std::string lookupRecord(int id);
+    bool insertrecord(int id, const std::string& data, const std::vector<float>& embeddings);
+    std::string lookuprecord(int id);
+    std::string selectrecord(int id, int k);
 
 private:
     sqlite3* db;
     hnswlib::L2Space* space;
     hnswlib::HierarchicalNSW<float>* alg_hnsw;
-    std::string hnswIndexPath;
-
-
-    
+    std::string hnswindexpath;
 };
 
-
-#endif // KNOWLEDGEMANAGERDB_H
+#endif // knowledgemanagerdb_h

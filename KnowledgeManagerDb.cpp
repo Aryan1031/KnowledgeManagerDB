@@ -2,6 +2,7 @@
 #include <iostream>
 #include <random>
 #include <stdexcept>
+
 knowledgemanagerdb::knowledgemanagerdb(const char* dbpath) {
     sqlite3_open(dbpath, &db);
 

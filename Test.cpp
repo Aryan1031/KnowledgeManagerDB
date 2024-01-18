@@ -3,7 +3,6 @@
 #include <stdexcept>
 #ifndef KNOWLEDGEMANAGERDB_H
 #define KNOWLEDGEMANAGERDB_H
-// ... (rest of the header file)
 #endif // KNOWLEDGEMANAGERDB_H
 
 // Print records 

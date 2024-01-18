@@ -1,6 +1,6 @@
 #ifndef knowledgemanagerdb_h
-#define knowledgemanagerdb_h
 
+#define knowledgemanagerdb_h
 #include "./dependency_folder/sqlite.gz/sqlite-autoconf-3400100/sqlite3.h"
 #include "./dependency_folder/hnswlib/hnswlib/hnswlib.h"
 #include <string>

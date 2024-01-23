@@ -1,6 +1,6 @@
 Introduction:
 
-The Knowledge Manager is an integral component of your AI generative model, facilitating the storage and retrieval of information. This tool employs both SQLite for text data and hnswlib for vector embeddings. This document offers an insightful explanation of the Knowledge Manager's functionality, especially the integration with hnswlib and SQLite.
+The Knowledge Manager is an integral component of the AI generative model, facilitating the storage and retrieval of information. This tool employs both SQLite for text data and hnswlib for vector embeddings. This document offers an insightful explanation of the Knowledge Manager's functionality, especially the integration with hnswlib and SQLite.
 
 1. Initialization
 KnowledgeManagerDb knowledgeManager("my_database.db");
